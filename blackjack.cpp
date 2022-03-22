@@ -21,9 +21,9 @@ void csleep(int millis);
 int dealCards(void);
 bool isAce(string cardsIndex);
 void wait(void);
-void checkHighScore(int score);
+void checkHighScore(int score, string fileLocation);
 string readLine(const string &filename, int N);
-void displayHighScore(void);
+void displayHighScore(string fileLocation);
 
 // path to highscore file
 string highscoreFileLocation;

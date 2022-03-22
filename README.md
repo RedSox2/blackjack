@@ -3,3 +3,10 @@ Blackjack is a casino game where players take cards trying to add up their total
 
 ## Steps to install:
 
+### Windows: 
+
+1. Click on the green `Code` button in github and download the zip file. 
+2. Then, navigate to the windows File Explorer and extract the files
+3. Third, open the `blackjack-main` folder and right click the file called `highscores`. You need to `copy file path` (don't skip this, its important if you want to save highscores)
+4. Double click the `play-blackjack` folder to run the program!  
+ When the program asks for the highscore file path, just paste it down! 

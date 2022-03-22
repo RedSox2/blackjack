@@ -25,6 +25,9 @@ void checkHighScore(int score);
 string readLine(const string &filename, int N);
 void displayHighScore(void);
 
+// path to highscore file
+string highscoreFileLocation;
+
 // player and dealer card inventories
 int dealerCards[5] = {0, 0, 0, 0, 0};
 int dealerDealIndex = 0;
@@ -76,6 +79,9 @@ int main() {
     csleep(5000);
     Clear();
 
+    cout << "Please enter the location to the highscores file: " << endl;
+    cin >> highscoreFileLocation; 
+
     cout << "                          WELCOME TO:                                      \n\n";
     cout << " _____       __           _________     __________    __    __               \n";
     cout << "|  _  \\     |  |         |   ___   |   |   _______|  |  | /  /              \n";
@@ -94,7 +100,7 @@ int main() {
     cout << "     \\_______/  |__|   |__|   |__________|  |__| \\__\\                     \n";
     cout << "                                                                             \n";
     cout << "                                                                             \n";
-    displayHighScore();
+    displayHighScore(highscoreFileLocation);
     cout << "                                                                           \n\n";
 
     wait();
@@ -321,7 +327,7 @@ int main() {
         cout << "You finished with $" << balance << "! Great job!" << endl;
     }
 
-    checkHighScore(balance);
+    checkHighScore(balance, highscoreFileLocation);
 
     return 69;
 } 
@@ -379,9 +385,9 @@ void wait(void) {
 
 string readLine(const string& filename, int N)
 {
-  std::ifstream in(filename.c_str());
+  ifstream in(filename.c_str());
 
-  std::string s;
+  string s;
   //for performance
   s.reserve(100);
 
@@ -393,9 +399,9 @@ string readLine(const string& filename, int N)
   return s;
 }
 
-void displayHighScore(void)
+void displayHighScore(string fileLocation)
 {
-  ifstream highScoreDisplay("C:\\Users\\Samir\\Documents\\projects\\blackjack\\highscores.txt");
+  ifstream highScoreDisplay(fileLocation);
   string displayStr;
   cout << endl
        << endl
@@ -415,14 +421,14 @@ void displayHighScore(void)
   cout << "$" << displayStr;
 }
 
-void checkHighScore(int score)
+void checkHighScore(int score, string fileLocation)
 {
   ofstream highScores;
   string urName;
   time_t myTime = time(0);
   char *dateTime = ctime(&myTime);
 
-  if (score > stoi(readLine("C:\\Users\\Samir\\Documents\\projects\\blackjack\\highscores.txt", 4)))
+  if (score > stoi(readLine(fileLocation, 4)))
   {
     cout << "Congrats!!!!!!!!!!!!!!!!!" << endl;
     cout << "You also got a highscore!" << endl;

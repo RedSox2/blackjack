@@ -76,7 +76,6 @@ int main() {
         }
     }
     
-    csleep(5000);
     Clear();
 
     cout << "Please enter the location to the highscores file: " << endl;

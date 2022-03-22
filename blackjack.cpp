@@ -25,9 +25,6 @@ void checkHighScore(int score, string fileLocation);
 string readLine(const string &filename, int N);
 void displayHighScore(string fileLocation);
 
-// path to highscore file
-string highscoreFileLocation;
-
 // player and dealer card inventories
 int dealerCards[5] = {0, 0, 0, 0, 0};
 int dealerDealIndex = 0;
@@ -64,8 +61,20 @@ bool cardsDealt[53] = {true, false, false, false, false, false, false, false, fa
 int cardsLeft = 52;
 
 
+std::string GetCurrentDirectory()
+{
+	char buffer[MAX_PATH];
+	GetModuleFileNameA(NULL, buffer, MAX_PATH);
+	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+	
+	return std::string(buffer).substr(0, pos);
+}
+string highscoreFileLocation = GetCurrentDirectory() + "\\highscores.txt";
 
-int main() {
+
+
+int main(int argc, char ** argv) {
+
 
     shuffle(cards.begin()+1, cards.end(), default_random_engine(time(NULL)));
     for (int i = 1; i <= 53; i++) {
@@ -75,11 +84,8 @@ int main() {
             }
         }
     }
-    
-    Clear();
 
-    cout << "Please enter the location to the highscores file: " << endl;
-    cin >> highscoreFileLocation; 
+    Clear();
 
     cout << "                          WELCOME TO:                                      \n\n";
     cout << " _____       __           _________     __________    __    __               \n";
@@ -100,9 +106,8 @@ int main() {
     cout << "                                                                             \n";
     cout << "                                                                             \n";
     displayHighScore(highscoreFileLocation);
-    cout << "                                                                           \n\n";
 
-    wait();
+    csleep(10000);
 
     Clear();
 
@@ -441,3 +446,5 @@ void checkHighScore(int score, string fileLocation)
     highScores.close();
   }
 }
+
+// "C:\\Users\\Samir\\Documents\\projects\\hangman\\highscores.txt"

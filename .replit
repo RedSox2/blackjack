@@ -1,0 +1,2 @@
+language = "bash"
+run = "read -p \"Which file do you want to run? \" x; g++ -o $x $x.cpp; ./$x; rm ./$x"

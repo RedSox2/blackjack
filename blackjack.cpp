@@ -1,9 +1,4 @@
 #include <iostream>
-#ifdef _WIN32
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <array>
@@ -14,6 +9,14 @@
 #include <string.h>
 #include <sstream>
 #include <fstream>
+#ifdef _WIN32
+#include <direct.h>
+#include <Windows.h>
+#define GetCurrentDir _getcwd
+#else
+#include <unistd.h>
+#define GetCurrentDir getcwd
+#endif
 using namespace std;
 
 void Clear(void);
@@ -24,6 +27,7 @@ void wait(void);
 void checkHighScore(int score, string fileLocation);
 string readLine(const string &filename, int N);
 void displayHighScore(string fileLocation);
+string GetCurrentDirectory(void);
 
 // player and dealer card inventories
 int dealerCards[5] = {0, 0, 0, 0, 0};
@@ -42,6 +46,7 @@ int playerDistance;
 int dealerDistance;
 int numCardsDealt = 0;
 int aceCount = 0;
+string highscoreFileLocation;
 
 // loop variables
 bool myRound = true;
@@ -61,21 +66,22 @@ bool cardsDealt[53] = {true, false, false, false, false, false, false, false, fa
 int cardsLeft = 52;
 
 
-std::string GetCurrentDirectory()
-{
-	char buffer[MAX_PATH];
-	GetModuleFileNameA(NULL, buffer, MAX_PATH);
-	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
-	
-	return std::string(buffer).substr(0, pos);
+std::string GetExePath( void ) {
+  char buff[FILENAME_MAX];
+  GetCurrentDir( buff, FILENAME_MAX );
+  std::string current_working_dir(buff);
+  return current_working_dir;
 }
-string highscoreFileLocation = GetCurrentDirectory() + "\\highscores.txt";
 
 
 
-int main(int argc, char ** argv) {
+int main() {
 
-
+    #ifdef _WIN32
+    highscoreFileLocation = GetExePath() + "\\highscores.txt";
+    #else
+    highscoreFileLocation = GetExePath() + "/highscores.txt";
+    #endif
     shuffle(cards.begin()+1, cards.end(), default_random_engine(time(NULL)));
     for (int i = 1; i <= 53; i++) {
         for (int n = 1; n <= 53; n++) {
@@ -167,10 +173,11 @@ int main(int argc, char ** argv) {
         cin >> bet;
         if (bet > balance) { bet = balance; }
         else if ( bet < 0.01) { bet = 0.01; }
+
+        
         if ( playerTotal == 11 && (cardVals[playerCards[0]] == 10 || cardVals[playerCards[1]] == 10) ) {
             cout << "You have blackjack!" << endl;
             cout << "You had a " << cards[playerCards[0]] << " and a " << cards[playerCards[1]] << endl;
-            balance += bet;
             myRound = false;
             blackjack = true;
             
@@ -294,15 +301,17 @@ int main(int argc, char ** argv) {
         if (busted) {
             cout << "You lose!" << " Your bet ($" << bet << ") has been deducted from your total ($" << balance << ")." << endl;
             balance = balance - bet;
-        } else if (blackjack) {
+        } else if (blackjack && !dealerBlackjack) {
             cout << "You win! " << "Your bet ($" << bet << ") has been added to your total ($" << balance << ")" << endl;
-            balance = balance + bet*1.5;
+            balance += bet*1.5;
         } else if (dealerBusted && !busted && !blackjack) {
             cout << "You win! " << "Your bet ($" << bet << ") has been added to your total ($" << balance << ")" << endl;
             balance = balance + bet;
         } else if (dealerBlackjack && !blackjack) {
             cout << "You lose!" << " Your bet ($" << bet << ") has been deducted from your total ($" << balance << ")." << endl;
             balance = balance - bet;
+        } else if (blackjack && dealerBlackjack) {
+            cout << "Push!" << "You both have blackjack!" << endl;
         } else {
             playerDistance = 21 - playerTotal;
             dealerDistance = 21 - dealerTotal;
@@ -414,37 +423,30 @@ void displayHighScore(string fileLocation)
        << endl
        << endl;
 
-  while (!highScoreDisplay.eof())
-  {
-    getline(highScoreDisplay, displayStr);
-    cout << "" << displayStr << "\n";
-    if (displayStr == "Score: ") {
-        break;
+    for (int i=0; i<=4; i++) {
+        getline(highScoreDisplay, displayStr);
+        cout << displayStr << endl;
     }
-  } getline(highScoreDisplay, displayStr);
-  cout << "$" << displayStr;
 }
-
 void checkHighScore(int score, string fileLocation)
 {
-  ofstream highScores;
-  string urName;
-  time_t myTime = time(0);
-  char *dateTime = ctime(&myTime);
-
-  if (score > stoi(readLine(fileLocation, 4)))
-  {
-    cout << "Congrats!!!!!!!!!!!!!!!!!" << endl;
-    cout << "You also got a highscore!" << endl;
-    cout << "Please enter your name to be logged for the highscore: ";
-    cin >> urName;
-    highScores.open("C:\\Users\\Samir\\Documents\\projects\\hangman\\highscores.txt");
-    highScores << "By: " << urName << endl;
-    highScores << "Date: " << dateTime;
-    highScores << "Score: " << endl;
-    highScores << score;
-    highScores.close();
-  }
+    ofstream highScores;
+    string urName;
+    time_t myTime = time(0);
+    char *dateTime = ctime(&myTime);
+    
+    
+    if (score > stod( readLine(fileLocation, 4).erase(0,1) ))
+    {
+        cout << "Congrats!!!!!!!!!!!!!!!!!" << endl;
+        cout << "You also got a highscore!" << endl;
+        cout << "Please enter your name to be logged for the highscore: ";
+        cin >> urName;
+        highScores.open(fileLocation);
+        highScores << "By: " << urName << endl;
+        highScores << "Date: " << dateTime;
+        highScores << "Score: " << endl;
+        highScores << "$" << score;
+        highScores.close();
+    }
 }
-
-// "C:\\Users\\Samir\\Documents\\projects\\hangman\\highscores.txt"

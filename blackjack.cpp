@@ -42,6 +42,7 @@ bool blackjack = false;
 bool dealerBlackjack = false;
 bool busted = false;
 bool dealerBusted = false;
+bool fiveCard = false;
 int playerDistance;
 int dealerDistance;
 int numCardsDealt = 0;
@@ -253,8 +254,9 @@ int main() {
                 busted = true;
             } else if (playerCards[4] != 0 && !blackjack && !busted) {
                 cout << "You have 5 Card Charlie!" << endl;
-                blackjack = true;
+                fiveCard = true;
                 myRound = false;
+                
             }
         }
 
@@ -274,7 +276,7 @@ int main() {
             dealerBusted = true;
         }
         csleep(3000);
-        if (!blackjack && dealerTotal <= 16) {
+        if (!blackjack && dealerTotal <= 16 && !dealerBlackjack) {
             while (dealerTotal <= 16 && dealerCards[4] == 0) 
             {
                 Clear();
@@ -301,6 +303,8 @@ int main() {
         if (busted) {
             cout << "You lose!" << " Your bet ($" << bet << ") has been deducted from your total ($" << balance << ")." << endl;
             balance = balance - bet;
+        } else if (fiveCard && !busted && !blackjack) {
+            cout << "You win! " << "Your bet ($" << bet << ") has been added yo your total ($" << balance << ")!" << endl;
         } else if (blackjack && !dealerBlackjack) {
             cout << "You win! " << "Your bet ($" << bet << ") has been added to your total ($" << balance << ")" << endl;
             balance += bet*1.5;
@@ -311,7 +315,7 @@ int main() {
             cout << "You lose!" << " Your bet ($" << bet << ") has been deducted from your total ($" << balance << ")." << endl;
             balance = balance - bet;
         } else if (blackjack && dealerBlackjack) {
-            cout << "Push!" << "You both have blackjack!" << endl;
+            cout << "Push! " << "You both have blackjack!" << endl;
         } else {
             playerDistance = 21 - playerTotal;
             dealerDistance = 21 - dealerTotal;
@@ -334,6 +338,7 @@ int main() {
         else if ( balance == 0 ) { deckThru = true; }
     }
     Clear();
+    balance = floor((100 * balance) + 0.5) / 100;
     if (balance == 0) {
         cout << "You lost $" << bet << " and have no money left." << endl;
     } else if (balance > 0) {
@@ -417,13 +422,11 @@ void displayHighScore(string fileLocation)
   ifstream highScoreDisplay(fileLocation);
   string displayStr;
   cout << endl
-       << endl
-       << endl
        << "The current high score is: " << endl
        << endl
        << endl;
 
-    for (int i=0; i<=4; i++) {
+    while (!highScoreDisplay.eof()) {
         getline(highScoreDisplay, displayStr);
         cout << displayStr << endl;
     }
@@ -436,7 +439,7 @@ void checkHighScore(int score, string fileLocation)
     char *dateTime = ctime(&myTime);
     
     
-    if (score > stod( readLine(fileLocation, 4).erase(0,1) ))
+    if (score > stof( readLine(fileLocation, 4).erase(0,8) ))
     {
         cout << "Congrats!!!!!!!!!!!!!!!!!" << endl;
         cout << "You also got a highscore!" << endl;
@@ -445,8 +448,7 @@ void checkHighScore(int score, string fileLocation)
         highScores.open(fileLocation);
         highScores << "By: " << urName << endl;
         highScores << "Date: " << dateTime;
-        highScores << "Score: " << endl;
-        highScores << "$" << score;
+        highScores << "Score: $" << score << endl;
         highScores.close();
     }
 }

@@ -4,8 +4,8 @@
 #include <array>
 #include <ctime>
 #include <cmath>
-#include <algorithm>
 #include <random>
+#include <algorithm>
 #include <string.h>
 #include <sstream>
 #include <fstream>
@@ -24,7 +24,7 @@ void csleep(int millis);
 int dealCards(void);
 bool isAce(string cardsIndex);
 void wait(void);
-void checkHighScore(int score, string fileLocation);
+void checkHighScore(float score, string fileLocation);
 string readLine(const string &filename, int N);
 void displayHighScore(string fileLocation);
 string GetCurrentDirectory(void);
@@ -174,8 +174,8 @@ int main() {
         cin >> bet;
         if (bet > balance) { bet = balance; }
         else if ( bet < 0.01) { bet = 0.01; }
+            balance = floor((100 * balance) + 0.05) / 100;
 
-        
         if ( playerTotal == 11 && (cardVals[playerCards[0]] == 10 || cardVals[playerCards[1]] == 10) ) {
             cout << "You have blackjack!" << endl;
             cout << "You had a " << cards[playerCards[0]] << " and a " << cards[playerCards[1]] << endl;
@@ -227,13 +227,11 @@ int main() {
                 cout << endl << "Your cards are: " << cards[playerCards[0]] << " " << cards[playerCards[1]] << " " << cards[playerCards[2]] << " " << cards[playerCards[3]] << " " << cards[playerCards[4]] << endl;
                 cout << "(Max ace values credited) You have a total of: " << playerTotal << endl;
                 cout << "The dealer is showing: " << cards[dealerCards[1]] << endl;
-                YNhit = true;
 
                 cout << endl << "Would you like to hit (y) or stay (n)?" << endl;
                 cin >> hitORstay;
-                if (hitORstay == "y" || hitORstay == "Y" || hitORstay == "n" || hitORstay == "N") {
-                    YNhit = false;
-                } else {
+                if (hitORstay != "y" && hitORstay != "Y" && hitORstay != "n" && hitORstay != "N") 
+                {
                     hitORstay = "y";
                 }
 
@@ -245,7 +243,16 @@ int main() {
                     myRound = false;
                 }
                 
-            } else if (playerTotal == 21) { cout << "You have 21!" << endl; myRound = false; }
+            } else if (playerTotal == 21) { 
+                cout << "There are " << (52 - numCardsDealt) << " cards left in the deck." << endl;
+                cout << "Your current balance is: $" << balance << endl;
+                cout << "You are betting: $" << bet << endl;
+                cout << endl << "Your cards are: " << cards[playerCards[0]] << " " << cards[playerCards[1]] << " " << cards[playerCards[2]] << " " << cards[playerCards[3]] << " " << cards[playerCards[4]] << endl;
+                cout << "You have 21!" << endl;
+                cout << "The dealer is showing: " << cards[dealerCards[1]] << endl;
+                csleep(1000);
+                myRound = false;
+            }
             else if (playerTotal > 21) { 
                 cout << "You have busted!" << endl;
                 cout << "Your cards were: " << cards[playerCards[0]] << " " << cards[playerCards[1]] << " " << cards[playerCards[2]] << " " << cards[playerCards[3]] << " " << cards[playerCards[4]] << endl;
@@ -295,7 +302,21 @@ int main() {
             } 
         }
 
+        aceCount = 0;
+        for (int i = 0; i <= 4; i++) {
+            if (isAce(cards[playerCards[i]])) { 
+                aceCount = aceCount+1; 
+            }
+        }
+
         playerTotal = cardVals[playerCards[0]] + cardVals[playerCards[1]] + cardVals[playerCards[2]] + cardVals[playerCards[3]] + cardVals[playerCards[4]];
+        for (int i = aceCount; i >= 0; i--) {
+            if (playerTotal <= (21 - (10*i))) {
+                playerTotal += 10*i;
+                break;
+            }
+        }
+        
         dealerTotal = cardVals[dealerCards[0]] + cardVals[dealerCards[1]] + cardVals[dealerCards[2]] + cardVals[dealerCards[3]] + cardVals[dealerCards[4]];
 
         playerDistance = 21;
@@ -338,7 +359,8 @@ int main() {
         else if ( balance == 0 ) { deckThru = true; }
     }
     Clear();
-    balance = floor((100 * balance) + 0.5) / 100;
+    balance = floor((100 * balance) + 0.05) / 100;
+    
     if (balance == 0) {
         cout << "You lost $" << bet << " and have no money left." << endl;
     } else if (balance > 0) {
@@ -347,7 +369,7 @@ int main() {
 
     checkHighScore(balance, highscoreFileLocation);
 
-    return 69;
+    return EXIT_SUCCESS;
 } 
 
 void Clear(void)
@@ -431,15 +453,14 @@ void displayHighScore(string fileLocation)
         cout << displayStr << endl;
     }
 }
-void checkHighScore(int score, string fileLocation)
+void checkHighScore(float score, string fileLocation)
 {
     ofstream highScores;
     string urName;
     time_t myTime = time(0);
     char *dateTime = ctime(&myTime);
     
-    
-    if (score > stof( readLine(fileLocation, 4).erase(0,8) ))
+    if (score > stof( readLine(fileLocation, 3).erase(0,8) ))
     {
         cout << "Congrats!!!!!!!!!!!!!!!!!" << endl;
         cout << "You also got a highscore!" << endl;

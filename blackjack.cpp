@@ -243,7 +243,7 @@ int main() {
                 cout << "(Max ace values credited) You have a total of: " << playerTotal << endl;
                 cout << "The dealer is showing: " << cards[dealerCards[1]] << endl;
 
-                if (!doubledDown && bet < balance && playerCards[2] == 0) {
+                if (!doubledDown && bet < balance && playerCards[2] == 0 && !splitted) {
                     cout << "Would you like to double down? (y/n)" << endl;
                     cin  >> doubleDown;
                     if (doubleDown != "y" && doubleDown != "Y" && doubleDown != "N" && doubleDown != "n") 
@@ -298,7 +298,6 @@ int main() {
                         splitted = true;
                         cout << "Got it" << endl;
                         splithCards[0] = playerCards[1];
-                        doubledDown = true;
                         playerCards[1] = 0;
                         while (myRound)
                         {

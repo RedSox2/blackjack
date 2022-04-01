@@ -33,17 +33,27 @@ string GetCurrentDirectory(void);
 int dealerCards[5] = {0, 0, 0, 0, 0};
 int dealerDealIndex = 0;
 int playerCards[5] = {0, 0, 0, 0, 0};
+int splithCards[5] = {0, 0, 0, 0, 0};
+int splithDealIndex = 0;
 int playerDealIndex = 0;
 int dealerTotal;
-int playerTotal = 7;
+int playerTotal;
+int splithTotal;
 int aceValue;
 string hitORstay;
+string split;
+bool splitted;
+string doubleDown;
 bool blackjack = false;
+bool doubledDown = false; 
 bool dealerBlackjack = false;
 bool busted = false;
+bool splitBusted = false;
 bool dealerBusted = false;
 bool fiveCard = false;
+bool splitFiveCard = false;
 int playerDistance;
+int splithDistance;
 int dealerDistance;
 int numCardsDealt = 0;
 int aceCount = 0;
@@ -51,7 +61,7 @@ string highscoreFileLocation;
 
 // loop variables
 bool myRound = true;
-bool YNhit = true;
+bool shRound = true;
 bool deckThru = false;
 
 // player money managment
@@ -113,9 +123,7 @@ int main() {
     cout << "                                                                             \n";
     cout << "                                                                             \n";
     displayHighScore(highscoreFileLocation);
-
-    csleep(10000);
-
+    wait();
     Clear();
 
     cout << "*You will start with $5 in chips.\n";
@@ -131,6 +139,13 @@ int main() {
     while (!deckThru)
     {
 
+        doubledDown = false;
+        splitted = false;
+        split = "";
+        doubleDown = "";
+        splitBusted = false;
+        splitFiveCard = false;
+        fiveCard = false;
         blackjack = false;
         busted = false;
         dealerBusted = false;
@@ -174,7 +189,7 @@ int main() {
         cin >> bet;
         if (bet > balance) { bet = balance; }
         else if ( bet < 0.01) { bet = 0.01; }
-            balance = floor((100 * balance) + 0.05) / 100;
+        bet = floor((100 * bet) + 0.5) / 100;
 
         if ( playerTotal == 11 && (cardVals[playerCards[0]] == 10 || cardVals[playerCards[1]] == 10) ) {
             cout << "You have blackjack!" << endl;
@@ -228,19 +243,168 @@ int main() {
                 cout << "(Max ace values credited) You have a total of: " << playerTotal << endl;
                 cout << "The dealer is showing: " << cards[dealerCards[1]] << endl;
 
-                cout << endl << "Would you like to hit (y) or stay (n)?" << endl;
-                cin >> hitORstay;
-                if (hitORstay != "y" && hitORstay != "Y" && hitORstay != "n" && hitORstay != "N") 
-                {
-                    hitORstay = "y";
+                if (!doubledDown && bet < balance && playerCards[2] == 0) {
+                    cout << "Would you like to double down? (y/n)" << endl;
+                    cin  >> doubleDown;
+                    if (doubleDown != "y" && doubleDown != "Y" && doubleDown != "N" && doubleDown != "n") 
+                        doubleDown = "y";
+                    if (doubleDown == "y" || doubleDown == "Y") {
+                        if (bet*2 <= balance) {
+                            bet = bet*2;
+                        } else {
+                            bet = balance;
+                        }
+                        playerCards[2] = dealCards();
+                        doubleDown = true;
+                        cout << "Your next card is: " << cards[playerCards[2]] << endl;
+                        aceCount = 0;
+                        for (int i = 0; i <= 4; i++) {
+                            if (isAce(cards[playerCards[i]])) { 
+                                aceCount = aceCount+1; 
+                            }
+                        }
+            
+                        playerTotal = cardVals[playerCards[0]] + cardVals[playerCards[1]] + cardVals[playerCards[2]] + cardVals[playerCards[3]] + cardVals[playerCards[4]];
+                        for (int i = aceCount; i >= 0; i--) {
+                            if (playerTotal <= (21 - (10*i))) {
+                                playerTotal += 10*i;
+                                break;
+                            }
+                        }
+                        
+                        if (playerTotal > 21) {
+                            cout << "You busted!" << endl;
+                            busted = true;
+                        } else {
+                            cout << "Your total stands at: " << playerTotal << endl;
+                        }  
+                        myRound = false;
+                        continue;
+                    }
                 }
+                
+                
+                if (cardVals[playerCards[0]] == cardVals[playerCards[1]] && balance - bet >= bet && !doubledDown && playerCards[2] == 0) {
+                    cout << "You have two of the same valued cards!" << endl;
+                    cout << "Would you like to split? (y/n)" << endl;
+                    cin >> split;
 
-                if (hitORstay == "y" || hitORstay == "Y") {
-                    playerCards[playerDealIndex] = dealCards();
-                    cout << "Here is your next card: " << cards[playerCards[playerDealIndex]] << endl;
-                    numCardsDealt++;
+                    if (split != "Y" && split != "y" && split != "n" && split != "N") {
+                        split = "n";
+                        continue;
+                    } else if (split == "n" || split == "N") {
+                        cout << "Okay" << endl;
+                    } else if (split == "y") {
+                        splitted = true;
+                        cout << "Got it" << endl;
+                        splithCards[0] = playerCards[1];
+                        doubledDown = true;
+                        playerCards[1] = 0;
+                        while (myRound)
+                        {
+                            aceCount = 0;
+                            for (int i = 0; i <= 4; i++) {
+                                if (isAce(cards[splithCards[i]])) { 
+                                    aceCount = aceCount+1; 
+                                }
+                            }
+                
+                            splithTotal = cardVals[splithCards[0]] + cardVals[splithCards[1]] + cardVals[splithCards[2]] + cardVals[splithCards[3]] + cardVals[splithCards[4]];
+                            for (int i = aceCount; i >= 0; i--) {
+                                if (splithTotal <= (21 - (10*i))) {
+                                    splithTotal += 10*i;
+                                    break;
+                                }
+                            }
+                            
+                            // cout << aceCount << endl;
+                            // cout << splithTotal << endl;
+                
+                                
+                            Clear();
+                            hitORstay = "";
+                                 if ( splithCards [0] == 0 ) { splithDealIndex = 0; }
+                            else if ( splithCards [1] == 0 ) { splithDealIndex = 1; }
+                            else if ( splithCards [2] == 0 ) { splithDealIndex = 2; }
+                            else if ( splithCards [3] == 0 ) { splithDealIndex = 3; }
+                            else if ( splithCards [4] == 0 ) { splithDealIndex = 4; }
+                
+                            Clear();
+                            if (splithTotal < 21 && splithCards[4] == 0) 
+                            {
+                                
+                                splitBusted = false;
+                                splitFiveCard = false;
+                                
+                                cout << "There are " << (52 - numCardsDealt) << " cards left in the deck." << endl;
+                                cout << "Your current balance is: $" << balance << endl;
+                                cout << "You are betting: $" << bet << endl;
+                                cout << endl << "Your first hand card is: " << cards[playerCards[0]] << endl; 
+                                cout << "Your cards are (for this hand): " << cards[splithCards[0]] << " " << cards[splithCards[1]] << " " << cards[splithCards[2]] << " " << cards[splithCards[3]] << " " << cards[splithCards[4]] << endl;
+                                cout << "(Max ace values credited) You have a total of: " << splithTotal << endl;
+                                cout << "The dealer is showing: " << cards[dealerCards[1]] << endl;
+                                
+                                cout << endl << "Would you like to hit (y) or stay (n)?" << endl;
+                                cin >> hitORstay;
+                                if (hitORstay != "y" && hitORstay != "Y" && hitORstay != "n" && hitORstay != "N") 
+                                {
+                                    hitORstay = "y";
+                                }
+                
+                                if (hitORstay == "y" || hitORstay == "Y") {
+                                    splithCards[splithDealIndex] = dealCards();
+                                    cout << "Here is your next card: " << cards[splithCards[splithDealIndex]] << endl;
+                                    numCardsDealt++;
+                                    csleep(1000);
+                                } else {
+                                    break;
+                                }
+                                
+                                
+                            } else if (splithTotal == 21) { 
+                                cout << "There are " << (52 - numCardsDealt) << " cards left in the deck." << endl;
+                                cout << "Your current balance is: $" << balance << endl;
+                                cout << "You are betting: $" << bet << endl;
+                                cout << endl << "Your cards are: " << cards[splithCards[0]] << " " << cards[splithCards[1]] << " " << cards[splithCards[2]] << " " << cards[splithCards[3]] << " " << cards[splithCards[4]] << endl;
+                                cout << "You have 21!" << endl;
+                                cout << "The dealer is showing: " << cards[dealerCards[1]] << endl;
+                                csleep(2000);
+                                break;
+                            }
+                            else if (splithTotal > 21) { 
+                                cout << "You have busted!" << endl;
+                                cout << "Your cards were: " << cards[splithCards[0]] << " " << cards[splithCards[1]] << " " << cards[splithCards[2]] << " " << cards[splithCards[3]] << " " << cards[splithCards[4]] << endl;
+                                cout << "You had a total of: " << splithTotal << endl;
+                                break;
+                                splitBusted = true;
+                            } else if (splithCards[4] != 0 && !blackjack && !busted) {
+                                cout << "You have 5 Card Charlie!" << endl;
+                                splitFiveCard = true;
+                                break;
+                                
+                            }
+                        }
+                        
+                        
+                    }
+                
                 } else {
-                    myRound = false;
+                    
+                
+                    cout << endl << "Would you like to hit (y) or stay (n)?" << endl;
+                    cin >> hitORstay;
+                    if (hitORstay != "y" && hitORstay != "Y" && hitORstay != "n" && hitORstay != "N") 
+                    {
+                        hitORstay = "y";
+                    }
+    
+                    if (hitORstay == "y" || hitORstay == "Y") {
+                        playerCards[playerDealIndex] = dealCards();
+                        cout << "Here is your next card: " << cards[playerCards[playerDealIndex]] << endl;
+                        numCardsDealt++;
+                    } else {
+                        myRound = false;
+                    }
                 }
                 
             } else if (playerTotal == 21) { 
@@ -302,6 +466,57 @@ int main() {
             } 
         }
 
+        // first hand checking
+        if (splitted) {
+            aceCount = 0;
+            for (int i = 0; i <= 4; i++) {
+                if (isAce(cards[splithCards[i]])) { 
+                    aceCount = aceCount+1; 
+                }
+            }
+    
+            splithTotal = cardVals[splithCards[0]] + cardVals[splithCards[1]] + cardVals[splithCards[2]] + cardVals[splithCards[3]] + cardVals[splithCards[4]];
+            for (int i = aceCount; i >= 0; i--) {
+                if (splithTotal <= (21 - (10*i))) {
+                    splithTotal += 10*i;
+                    break;
+                }
+            }
+            
+            dealerTotal = cardVals[dealerCards[0]] + cardVals[dealerCards[1]] + cardVals[dealerCards[2]] + cardVals[dealerCards[3]] + cardVals[dealerCards[4]];
+    
+            splithDistance = 21;
+            dealerDistance = 21;
+            if (busted) {
+                cout << "You lose your first hand!" << " Your bet ($" << bet << ") has been deducted from your total ($" << balance << ")." << endl;
+                balance = balance - bet;
+            } else if (splitFiveCard && !splitBusted) {
+                cout << "You win your first hand! " << "Your bet ($" << bet << ") has been added yo your total ($" << balance << ")!" << endl;
+            } else if (dealerBusted && !splitBusted) {
+                cout << "You win your first hand! " << "Your bet ($" << bet << ") has been added to your total ($" << balance << ")" << endl;
+                balance = balance + bet;
+            } else if (dealerBlackjack) {
+                cout << "You lose your first hand!" << " Your bet ($" << bet << ") has been deducted from your total ($" << balance << ")." << endl;
+                balance = balance - bet;
+            } else {
+                splithDistance = 21 - splithTotal;
+                dealerDistance = 21 - dealerTotal;
+                if (splithDistance < dealerDistance) {
+                    cout << "You win your first hand! " << "Your bet ($" << bet << ") has been added to your total ($" << balance << ")" << endl;
+                    balance = balance + bet;
+                } else if (dealerDistance < splithDistance) {
+                    cout << "You lose your first hand!" << " Your bet ($" << bet << ") has been deducted from your total ($" << balance << ")." << endl;
+                    balance = balance - bet;
+                } else if (splithDistance == dealerDistance) {
+                    cout << "Your first hand is a push! " << "No change has been made to your balance" << endl;
+                }
+            }
+    
+            csleep(5000);
+        }
+
+        // second hand checking
+
         aceCount = 0;
         for (int i = 0; i <= 4; i++) {
             if (isAce(cards[playerCards[i]])) { 
@@ -327,7 +542,7 @@ int main() {
         } else if (fiveCard && !busted && !blackjack) {
             cout << "You win! " << "Your bet ($" << bet << ") has been added yo your total ($" << balance << ")!" << endl;
         } else if (blackjack && !dealerBlackjack) {
-            cout << "You win! " << "Your bet ($" << bet << ") has been added to your total ($" << balance << ")" << endl;
+            cout << "You win! " << "You win 1.5 times your bet ($" << bet << ")!" << endl;
             balance += bet*1.5;
         } else if (dealerBusted && !busted && !blackjack) {
             cout << "You win! " << "Your bet ($" << bet << ") has been added to your total ($" << balance << ")" << endl;
@@ -357,11 +572,12 @@ int main() {
 
         if (cardsLeft < 10) { deckThru = true; }
         else if ( balance == 0 ) { deckThru = true; }
+        balance = floor((100 * balance) + 0.5) / 100;
     }
     Clear();
-    balance = floor((100 * balance) + 0.05) / 100;
     
-    if (balance == 0) {
+    
+    if (balance <= 0) {
         cout << "You lost $" << bet << " and have no money left." << endl;
     } else if (balance > 0) {
         cout << "You finished with $" << balance << "! Great job!" << endl;
@@ -419,7 +635,7 @@ bool isAce(string cardsIndex)
 
 
 void wait(void) {
-    cout << endl << "Press [ENTER] to continue . . ." << endl;
+    cout << "Press [ENTER] to continue . . ." << endl;
     cin.get();
 }
 

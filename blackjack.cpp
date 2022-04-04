@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <array>
 #include <ctime>
-#include <cmath>
+#include <time.h>
 #include <random>
 #include <algorithm>
 #include <string.h>
@@ -170,6 +170,7 @@ int main() {
         dealerCards[0] = dealCards();
         playerCards[1] = dealCards();
         dealerCards[1] = dealCards();
+        
         // playerCards[0] = 22;
         // playerCards[1] = 2;
         
@@ -243,7 +244,7 @@ int main() {
                 cout << "(Max ace values credited) You have a total of: " << playerTotal << endl;
                 cout << "The dealer is showing: " << cards[dealerCards[1]] << endl;
 
-                if (!doubledDown && bet < balance && playerCards[2] == 0 && !splitted) {
+                if (!doubledDown && bet < balance && playerCards[2] == 0 && !splitted && (playerTotal == 10 || playerTotal == 11)) {
                     cout << "Would you like to double down? (y/n)" << endl;
                     cin  >> doubleDown;
                     if (doubleDown != "y" && doubleDown != "Y" && doubleDown != "N" && doubleDown != "n") 
@@ -672,8 +673,9 @@ void checkHighScore(float score, string fileLocation)
 {
     ofstream highScores;
     string urName;
-    time_t myTime = time(0);
-    char *dateTime = ctime(&myTime);
+    time_t myTime;
+    time(&myTime);
+    struct tm *timeinfo = localtime(&myTime);
     
     if (score > stof( readLine(fileLocation, 3).erase(0,8) ))
     {
@@ -683,7 +685,7 @@ void checkHighScore(float score, string fileLocation)
         cin >> urName;
         highScores.open(fileLocation);
         highScores << "By: " << urName << endl;
-        highScores << "Date: " << dateTime;
+        highScores << "Date: " << asctime(timeinfo);
         highScores << "Score: $" << score << endl;
         highScores.close();
     }

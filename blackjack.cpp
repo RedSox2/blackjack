@@ -541,6 +541,7 @@ int main() {
             balance = balance - bet;
         } else if (fiveCard && !busted && !blackjack) {
             cout << "You win! " << "Your bet ($" << bet << ") has been added yo your total ($" << balance << ")!" << endl;
+            balance += bet;
         } else if (blackjack && !dealerBlackjack) {
             cout << "You win! " << "You win 1.5 times your bet ($" << bet << ")!" << endl;
             balance += bet*1.5;

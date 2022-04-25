@@ -1,2 +1,2 @@
 language = "bash"
-run = "./linux-blackjack"
+run = "g++ -o linux-blackjack blackjack.cpp"
